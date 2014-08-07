@@ -1,0 +1,55 @@
+{
+  "uuid": "baff9a30-63de-4fd1-b5d1-8c0699e401eb",
+  "shortName": "Coin Flip",
+  "longName": "Coin Flip",
+  "companyName": "violentsquid",
+  "versionCode": 1,
+  "versionLabel": "1.0.0",
+  "capabilities": [ "configurable" ],
+  "watchapp": {
+    "watchface": false
+  },
+  "appKeys": {
+    "COIN":0
+  },
+  "resources": {
+    "media": [
+      {
+        "type": "png",
+        "name": "US_HEADS",
+        "file": "images/usheads.png"
+      },
+      {
+        "type": "png",
+        "name": "US_TAILS",
+        "file": "images/ustails.png"
+      },
+      {
+        "type": "png",
+        "name": "UK_HEADS",
+        "file": "images/ukheads.png"
+      },
+      {
+        "type": "png",
+        "name": "UK_TAILS",
+        "file": "images/uktails.png"
+      },
+      {
+        "type": "png",
+        "name": "CAN_HEADS",
+        "file": "images/canadaheads.png"
+      },
+      {
+        "type": "png",
+        "name": "CAN_TAILS",
+        "file": "images/canadatails.png"
+      },
+      {
+        "menuIcon": true,
+        "type":"png",
+        "name": "MENU_ICON",
+        "file": "images/coinflip.png"
+      }
+    ]
+  }
+}
