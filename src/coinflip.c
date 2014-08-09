@@ -53,6 +53,9 @@ static void timer_callback(){
 }
 
 static void flip(){
+	if (!persist_storage_working && last_flip == -1){
+			layer_set_frame(text_layer_get_layer(text_layer), (GRect) { .origin = { 0, 60 }, .size = { 144, 40 } });
+	}
 	if (times_called != 0)
 		app_timer_cancel(timer);
 	layer_set_hidden(text_layer_get_layer(text_layer), false);
@@ -97,17 +100,20 @@ static void process_tuple(Tuple *t){
 	strcpy(string_value, t->value->cstring);
 	if (key == COIN){
 		if (strcmp(string_value, "us") == 0){
-			persist_write_int(COIN, US);
+			if (persist_storage_working)
+				persist_write_int(COIN, US);
 			heads_bitmap = gbitmap_create_with_resource(RESOURCE_ID_US_HEADS);
 			tails_bitmap = gbitmap_create_with_resource(RESOURCE_ID_US_TAILS);	
 		}
 		else if (strcmp(string_value, "uk") == 0){
-			persist_write_int(COIN, UK);
+			if (persist_storage_working)
+				persist_write_int(COIN, UK);
 			heads_bitmap = gbitmap_create_with_resource(RESOURCE_ID_UK_HEADS);
 			tails_bitmap = gbitmap_create_with_resource(RESOURCE_ID_UK_TAILS);
 		}
 		else if (strcmp(string_value, "can") == 0){
-			persist_write_int(COIN, CAN);
+			if (persist_storage_working)
+				persist_write_int(COIN, CAN);
 			heads_bitmap = gbitmap_create_with_resource(RESOURCE_ID_CAN_HEADS);
 			tails_bitmap = gbitmap_create_with_resource(RESOURCE_ID_CAN_TAILS);	
 		}
@@ -176,40 +182,38 @@ static void app_message_init()
 static void window_load(Window *window) {
 	Layer *window_layer = window_get_root_layer(window);
 	GRect bounds = layer_get_bounds(window_layer);
-
+	if (persist_storage_working && persist_exists(COIN)){
+		int coin = persist_read_int(COIN);
+		switch (coin){
+			case US:
+				heads_bitmap = gbitmap_create_with_resource(RESOURCE_ID_US_HEADS);
+				tails_bitmap = gbitmap_create_with_resource(RESOURCE_ID_US_TAILS);
+				break;
+			case UK:
+				heads_bitmap = gbitmap_create_with_resource(RESOURCE_ID_UK_HEADS);
+				tails_bitmap = gbitmap_create_with_resource(RESOURCE_ID_UK_TAILS);
+				break;
+			case CAN:
+				heads_bitmap = gbitmap_create_with_resource(RESOURCE_ID_CAN_HEADS);
+				tails_bitmap = gbitmap_create_with_resource(RESOURCE_ID_CAN_TAILS);
+		}
+	}
+	else{
+		heads_bitmap = gbitmap_create_with_resource(RESOURCE_ID_US_HEADS);
+		tails_bitmap = gbitmap_create_with_resource(RESOURCE_ID_US_TAILS);
+	}
+	bitmap_layer = bitmap_layer_create(GRect(0,0,144,144));
+	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(bitmap_layer));
 	if (persist_storage_working){
-		if (persist_exists(COIN)){
-			int coin = persist_read_int(COIN);
-			switch (coin){
-				case US:
-					heads_bitmap = gbitmap_create_with_resource(RESOURCE_ID_US_HEADS);
-					tails_bitmap = gbitmap_create_with_resource(RESOURCE_ID_US_TAILS);
-					break;
-				case UK:
-					heads_bitmap = gbitmap_create_with_resource(RESOURCE_ID_UK_HEADS);
-					tails_bitmap = gbitmap_create_with_resource(RESOURCE_ID_UK_TAILS);
-					break;
-				case CAN:
-					heads_bitmap = gbitmap_create_with_resource(RESOURCE_ID_CAN_HEADS);
-					tails_bitmap = gbitmap_create_with_resource(RESOURCE_ID_CAN_TAILS);
-			}
-		}
-		else{
-			heads_bitmap = gbitmap_create_with_resource(RESOURCE_ID_US_HEADS);
-			tails_bitmap = gbitmap_create_with_resource(RESOURCE_ID_US_TAILS);
-		}
-		bitmap_layer = bitmap_layer_create(GRect(0,0,144,144));
-		layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(bitmap_layer));
-		text_layer = text_layer_create((GRect) { .origin = { 0, 72 }, .size = { bounds.size.w, 40 } });
-		text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+		text_layer = text_layer_create((GRect) { .origin = { 0, 60 }, .size = { bounds.size.w, 40 } });
 		text_layer_set_text(text_layer, "Shake/Press to Flip");
-		text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
 	}
 	else{
 		text_layer = text_layer_create((GRect){.origin = {0,0}, .size = {bounds.size.w, 144}});
-		text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
 		text_layer_set_text(text_layer, "Persistent Storage is Broken. Please Factory Reset Watch. Visit bit.ly/ urbpebstorage for more information.");
 	}
+	text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
+	text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
 	
 
 	
@@ -232,12 +236,10 @@ static void init(void) {
 		.load = window_load,
 		.unload = window_unload,
 	});
-	if (persist_storage_working){
-		window_set_click_config_provider(window, click_config_provider);
-		srand(time(NULL));
-		accel_tap_service_subscribe(accel_tap_handler);
-		app_message_init();
-	}
+	window_set_click_config_provider(window, click_config_provider);
+	srand(time(NULL));
+	accel_tap_service_subscribe(accel_tap_handler);
+	app_message_init();
 	const bool animated = true;
 	window_stack_push(window, animated);
 }
