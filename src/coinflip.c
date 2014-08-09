@@ -208,7 +208,7 @@ static void window_load(Window *window) {
 	else{
 		text_layer = text_layer_create((GRect){.origin = {0,0}, .size = {bounds.size.w, 144}});
 		text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
-		text_layer_set_text(text_layer, "Persistant Storage is Broken. Please Factory Reset Watch. Visit bit.ly/ urbpebstorage for more information.");
+		text_layer_set_text(text_layer, "Persistent Storage is Broken. Please Factory Reset Watch. Visit bit.ly/ urbpebstorage for more information.");
 	}
 	
 
