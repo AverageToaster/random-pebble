@@ -19,4 +19,4 @@
     * Canadian Dollar
 
 ## Credits
-Credit to @rpsqrd for images.
+Credit to [@rpsqrd](https://github.com/rpsqrd) for Coin Faces.
