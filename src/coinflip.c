@@ -19,68 +19,76 @@ static int times_called = 0;
 static bool persist_storage_working;
 static int last_flip = -1;
 
-static void test_persist_storage(){
+static void test_persist_storage()
+{
 	int test = persist_write_bool(100, true);
 	if (test < 0)
 		persist_storage_working = false;
-	else{
+	else
+	{
 		persist_storage_working = true;
 		persist_delete(100);
 	}
 }
 
-static void timer_callback(){
-	if (times_called == 0){
+static void timer_callback()
+{
+	if (times_called == 0)
+	{
 		text_layer_set_text(text_layer, "Flipping.  ");
 		times_called++;
 		timer = app_timer_register(150, timer_callback, NULL);
 	}
-	else if (times_called == 1){
+	else if (times_called == 1)
+	{
 		text_layer_set_text(text_layer, "Flipping.. ");
 		times_called++;
 		timer = app_timer_register(150, timer_callback, NULL);
 	}
-	else if (times_called == 2){
+	else if (times_called == 2)
+	{
 		text_layer_set_text(text_layer, "Flipping...");
 		times_called++;
 		timer = app_timer_register(150, timer_callback, NULL);
 	}
-	else{
+	else
+	{
 		layer_set_hidden(text_layer_get_layer(text_layer), true);
 		layer_set_hidden(bitmap_layer_get_layer(bitmap_layer), false);
 		times_called = 0;
 	}
 }
 
-static void flip(){
-	if (!persist_storage_working && last_flip == -1){
+static void flip()
+{
+	if (!persist_storage_working && last_flip == -1)
 			layer_set_frame(text_layer_get_layer(text_layer), (GRect) { .origin = { 0, 60 }, .size = { 144, 40 } });
-	}
 	if (times_called != 0)
 		app_timer_cancel(timer);
 	layer_set_hidden(text_layer_get_layer(text_layer), false);
 	layer_set_hidden(bitmap_layer_get_layer(bitmap_layer), true);
 	text_layer_set_text(text_layer, "Flipping   ");
 	last_flip = rand() % 2;
-	if (last_flip == 0){
+	if (last_flip == 0)
 		bitmap_layer_set_bitmap(bitmap_layer, tails_bitmap);
-	}
-	else{
+	else
 		bitmap_layer_set_bitmap(bitmap_layer, heads_bitmap);
-	}
 	times_called = 0;
 	timer = app_timer_register(150, timer_callback, NULL);
 }
 
-static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
+static void select_click_handler(ClickRecognizerRef recognizer, void *context) 
+{
 	flip();
 }
 
-static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
+static void up_click_handler(ClickRecognizerRef recognizer, void *context) 
+{
 	flip();
 }
 
-static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
+static void down_click_handler(ClickRecognizerRef recognizer, void *context) 
+{
 	flip();
 }
 
@@ -88,38 +96,52 @@ static void accel_tap_handler(AccelAxisType axis, int32_t direction)
 {
 	flip();
 }
-static void click_config_provider(void *context) {
+static void click_config_provider(void *context) 
+{
 	window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
 	window_single_click_subscribe(BUTTON_ID_UP, up_click_handler);
 	window_single_click_subscribe(BUTTON_ID_DOWN, down_click_handler);
 }
 
-static void process_tuple(Tuple *t){
+static void process_tuple(Tuple *t)
+{
 	int key = t->key;
 	char string_value[64];
 	strcpy(string_value, t->value->cstring);
-	if (key == COIN){
-		if (strcmp(string_value, "us") == 0){
+	if (key == COIN)
+	{
+		if (strcmp(string_value, "us") == 0)
+		{
 			if (persist_storage_working)
 				persist_write_int(COIN, US);
+			gbitmap_destroy(heads_bitmap);
+			gbitmap_destroy(tails_bitmap);
 			heads_bitmap = gbitmap_create_with_resource(RESOURCE_ID_US_HEADS);
-			tails_bitmap = gbitmap_create_with_resource(RESOURCE_ID_US_TAILS);	
+			tails_bitmap = gbitmap_create_with_resource(RESOURCE_ID_US_TAILS);
 		}
-		else if (strcmp(string_value, "uk") == 0){
+		else if (strcmp(string_value, "uk") == 0)
+		{
 			if (persist_storage_working)
 				persist_write_int(COIN, UK);
+			gbitmap_destroy(heads_bitmap);
+			gbitmap_destroy(tails_bitmap);
 			heads_bitmap = gbitmap_create_with_resource(RESOURCE_ID_UK_HEADS);
 			tails_bitmap = gbitmap_create_with_resource(RESOURCE_ID_UK_TAILS);
 		}
-		else if (strcmp(string_value, "can") == 0){
+		else if (strcmp(string_value, "can") == 0)
+		{
 			if (persist_storage_working)
 				persist_write_int(COIN, CAN);
+			gbitmap_destroy(heads_bitmap);
+			gbitmap_destroy(tails_bitmap);
 			heads_bitmap = gbitmap_create_with_resource(RESOURCE_ID_CAN_HEADS);
 			tails_bitmap = gbitmap_create_with_resource(RESOURCE_ID_CAN_TAILS);	
 		}
 	}
-	if (last_flip != -1){
-		switch(last_flip){
+	if (last_flip != -1)
+	{
+		switch(last_flip)
+		{
 			case 0:
 				bitmap_layer_set_bitmap(bitmap_layer, tails_bitmap);
 				break;
@@ -133,9 +155,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 {
 	Tuple *t = dict_read_first(iter);
 	if (t)
-	{
 		process_tuple(t);
-	}
 }
 
 static char *translate_error(AppMessageResult result) 
@@ -179,12 +199,15 @@ static void app_message_init()
 	app_message_open(app_message_inbox_size_maximum(),app_message_outbox_size_maximum());
 }
 
-static void window_load(Window *window) {
+static void window_load(Window *window) 
+{
 	Layer *window_layer = window_get_root_layer(window);
 	GRect bounds = layer_get_bounds(window_layer);
-	if (persist_storage_working && persist_exists(COIN)){
+	if (persist_storage_working && persist_exists(COIN))
+	{
 		int coin = persist_read_int(COIN);
-		switch (coin){
+		switch (coin)
+		{
 			case US:
 				heads_bitmap = gbitmap_create_with_resource(RESOURCE_ID_US_HEADS);
 				tails_bitmap = gbitmap_create_with_resource(RESOURCE_ID_US_TAILS);
@@ -198,41 +221,42 @@ static void window_load(Window *window) {
 				tails_bitmap = gbitmap_create_with_resource(RESOURCE_ID_CAN_TAILS);
 		}
 	}
-	else{
+	else
+	{
 		heads_bitmap = gbitmap_create_with_resource(RESOURCE_ID_US_HEADS);
 		tails_bitmap = gbitmap_create_with_resource(RESOURCE_ID_US_TAILS);
 	}
 	bitmap_layer = bitmap_layer_create(GRect(0,0,144,144));
 	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(bitmap_layer));
-	if (persist_storage_working){
+	if (persist_storage_working)
+	{
 		text_layer = text_layer_create((GRect) { .origin = { 0, 60 }, .size = { bounds.size.w, 40 } });
 		text_layer_set_text(text_layer, "Shake/Press to Flip");
 	}
-	else{
+	else
+	{
 		text_layer = text_layer_create((GRect){.origin = {0,0}, .size = {bounds.size.w, 144}});
 		text_layer_set_text(text_layer, "Persistant Storage is Broken. Please Factory Reset Watch. Visit bit.ly/ urbpebstorage for more information.");
 	}
 	text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
 	text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
-	
-
-	
 	layer_add_child(window_layer, text_layer_get_layer(text_layer));
-
-
 }
 
-static void window_unload(Window *window) {
+static void window_unload(Window *window) 
+{
 	text_layer_destroy(text_layer);
 	gbitmap_destroy(heads_bitmap);
 	gbitmap_destroy(tails_bitmap);
 	bitmap_layer_destroy(bitmap_layer);
 }
 
-static void init(void) {
+static void init(void) 
+{
 	test_persist_storage();
 	window = window_create();
-	window_set_window_handlers(window, (WindowHandlers) {
+	window_set_window_handlers(window, (WindowHandlers) 
+	{
 		.load = window_load,
 		.unload = window_unload,
 	});
@@ -244,11 +268,13 @@ static void init(void) {
 	window_stack_push(window, animated);
 }
 
-static void deinit(void) {
+static void deinit(void) 
+{
 	window_destroy(window);
 }
 
-int main(void) {
+int main(void) 
+{
 	init();
 	app_event_loop();
 	deinit();
