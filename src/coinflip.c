@@ -1,7 +1,7 @@
 #include <pebble.h>
-
 #define NUM_OF_COINS 3
 
+// For AppMessage
 enum
 {
 	COIN=0,
@@ -19,6 +19,11 @@ static int times_called = 0;
 static bool persist_storage_working;
 static int last_flip = -1;
 
+
+/*
+ * Make sure the persistant storage is working. 
+ * If not, have to prevent any persist calls from happening.
+ */
 static void test_persist_storage()
 {
 	int test = persist_write_bool(100, true);
@@ -31,6 +36,9 @@ static void test_persist_storage()
 	}
 }
 
+/*
+ * Recursive callback just to make a nice little animation so the user knows the coin has changed.
+ */
 static void timer_callback()
 {
 	if (times_called == 0)
@@ -59,6 +67,11 @@ static void timer_callback()
 	}
 }
 
+/*
+ * Method for flipping the coin.
+ * Initiate the animation for the timer callback, then get a random number from 0 to 1.
+ * 0 = tails, 1 = heads
+ */
 static void flip()
 {
 	if (!persist_storage_working && last_flip == -1)
@@ -77,32 +90,49 @@ static void flip()
 	timer = app_timer_register(150, timer_callback, NULL);
 }
 
+/*
+ * Handler for select button.
+ */
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) 
 {
 	flip();
 }
-
+/*
+ * Handler for up button.
+ */
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) 
 {
 	flip();
 }
-
+/*
+ * Handler for select button.
+ */
 static void down_click_handler(ClickRecognizerRef recognizer, void *context) 
 {
 	flip();
 }
-
+/*
+ * Handler for accelerator.
+ */
 static void accel_tap_handler(AccelAxisType axis, int32_t direction)
 {
 	flip();
 }
+/*
+ * Method to set up all the click handlers.
+ */
 static void click_config_provider(void *context) 
 {
 	window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
 	window_single_click_subscribe(BUTTON_ID_UP, up_click_handler);
 	window_single_click_subscribe(BUTTON_ID_DOWN, down_click_handler);
 }
-
+/*
+ * Method to process the AppMessage.
+ * Gets whatever coin was passed in from AppMessage,
+ * writes that value into persist storage so it remembers it across sessions,
+ * and sets the current bitmaps to the selected coin face.
+ */
 static void process_tuple(Tuple *t)
 {
 	int key = t->key;
@@ -138,26 +168,19 @@ static void process_tuple(Tuple *t)
 			tails_bitmap = gbitmap_create_with_resource(RESOURCE_ID_CAN_TAILS);	
 		}
 	}
-	if (last_flip != -1)
-	{
-		switch(last_flip)
-		{
-			case 0:
-				bitmap_layer_set_bitmap(bitmap_layer, tails_bitmap);
-				break;
-			default:
-				bitmap_layer_set_bitmap(bitmap_layer, heads_bitmap);
-		}
-	}
 }
-
+/*
+ * Handler for recieved AppMessage.
+ */
 static void in_received_handler(DictionaryIterator *iter, void *context)
 {
 	Tuple *t = dict_read_first(iter);
 	if (t)
 		process_tuple(t);
 }
-
+/*
+ * Helper function for translating AppMessage errors.
+ */
 static char *translate_error(AppMessageResult result) 
 {
 	switch (result)
@@ -179,17 +202,24 @@ static char *translate_error(AppMessageResult result)
 		default: return "UNKNOWN ERROR";
 	}
 }
-
+/*
+ * Handler for dropped messages
+ */
 static void in_dropped_handler(AppMessageResult reason, void *context) 
 {
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "App Message Dropped! Reason = %s", translate_error(reason));
 }
-
+/*
+ * Handler for failed messages.
+ */
 static void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, void *context) 
 {
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "App Message Failed to Send! %d : %s", reason, translate_error(reason));
 }
 
+/*
+ * Initalizer for app message. Sets handlers.
+ */
 static void app_message_init()
 {
 	app_message_register_inbox_received(in_received_handler);
@@ -198,7 +228,9 @@ static void app_message_init()
 
 	app_message_open(app_message_inbox_size_maximum(),app_message_outbox_size_maximum());
 }
-
+/*
+ * Function to create the window.
+ */
 static void window_load(Window *window) 
 {
 	Layer *window_layer = window_get_root_layer(window);
@@ -234,7 +266,13 @@ static void window_load(Window *window)
 		text_layer_set_text(text_layer, "Shake/Press to Flip");
 	}
 	else
+	/*
+	 * If persistant storage is broken, we want to inform the user that this is so.
+	 * However, since this app can still function without it, we still allow them to carry on
+	 * after displaying the error.
+	 */
 	{
+		
 		text_layer = text_layer_create((GRect){.origin = {0,0}, .size = {bounds.size.w, 144}});
 		text_layer_set_text(text_layer, "Persistent Storage is Broken. Please Factory Reset Watch. Visit bit.ly/ urbpebstorage for more information.");
 	}
@@ -242,7 +280,9 @@ static void window_load(Window *window)
 	text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
 	layer_add_child(window_layer, text_layer_get_layer(text_layer));
 }
-
+/*
+ * Function for cleaning up when the window (and app) close.
+ */
 static void window_unload(Window *window) 
 {
 	text_layer_destroy(text_layer);
@@ -251,8 +291,12 @@ static void window_unload(Window *window)
 	bitmap_layer_destroy(bitmap_layer);
 }
 
+/*
+ * Init. Start everything here.
+ */
 static void init(void) 
 {
+	// Very first thing we want to do is test that persist storage works.
 	test_persist_storage();
 	window = window_create();
 	window_set_window_handlers(window, (WindowHandlers) 
@@ -261,18 +305,24 @@ static void init(void)
 		.unload = window_unload,
 	});
 	window_set_click_config_provider(window, click_config_provider);
+	// We want a different random order every time, so we seed the random function with the current time.
 	srand(time(NULL));
 	accel_tap_service_subscribe(accel_tap_handler);
 	app_message_init();
-	const bool animated = true;
-	window_stack_push(window, animated);
+	window_stack_push(window, true);
 }
 
+/*
+ * Deinit. After window_unload is called, we want to also destroy the window. No memory leaks!
+ */
 static void deinit(void) 
 {
 	window_destroy(window);
 }
 
+/*
+ * Main!
+ */
 int main(void) 
 {
 	init();
