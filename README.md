@@ -2,6 +2,11 @@
 
 ## Changelog
 
+* v2.0
+	* Complete code overhaul
+	* Added RNG to app.
+	* User-defined range for RNG
+	* Remove Settings page, coin is set via app now.
 * v1.1.1
     * Fixed resource issue that caused the coin faces to disappear.
 * v1.1.0
