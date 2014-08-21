@@ -323,9 +323,9 @@ static void deinit(void)
 /*
  * Main!
  */
-int main(void) 
-{
-	init();
-	app_event_loop();
-	deinit();
-}
+// int main(void) 
+// {
+// 	init();
+// 	app_event_loop();
+// 	deinit();
+// }

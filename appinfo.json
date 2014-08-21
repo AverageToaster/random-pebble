@@ -1,16 +1,15 @@
 {
   "uuid": "baff9a30-63de-4fd1-b5d1-8c0699e401eb",
-  "shortName": "Coin Flip",
-  "longName": "Coin Flip",
-  "companyName": "violentsquid",
+  "shortName": "Random",
+  "longName": "Random",
+  "companyName": "TJ Stein",
   "versionCode": 1,
-  "versionLabel": "1.1.1",
-  "capabilities": [ "configurable" ],
+  "versionLabel": "2.0",
+  "capabilities": [],
   "watchapp": {
     "watchface": false
   },
   "appKeys": {
-    "COIN":0
   },
   "resources": {
     "media": [
@@ -49,6 +48,21 @@
         "type":"png",
         "name": "MENU_ICON",
         "file": "images/coinflip.png"
+      },
+      {
+        "type":"png",
+        "name":"UP",
+        "file":"images/up.png"
+      },
+      {
+        "type":"png",
+        "name":"DOWN",
+        "file":"images/down.png"
+      },
+      {
+        "type":"png",
+        "name":"CONFIRM",
+        "file":"images/confirm.png"
       }
     ]
   }
