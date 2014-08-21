@@ -1,5 +1,5 @@
 #include "pebble.h"
-#include "window-instructions.h"
+#include "window-welcome.h"
 #include "../libs/scroll-text-layer/scroll-text-layer.h"
 #include "../common.h"
 
@@ -12,11 +12,12 @@ static void click_select(ClickRecognizerRef recognizer, void *context);
 static Window *window;
 static ScrollTextLayer *scroll_layer;
 static Layer *layer_header;
-static char* text = "- Press Up and Down to cycle between Coin Flip and Random Number Generator. \n- Press Select or shake Pebble to flip coin or generate random number\n- Long Press Select to set the range of the generated number or coin face.\n- Long Press Up to access these instructions again.\n- Long Press Down to see About page";
+static char* text = "Welcome to v2.0! This app has changed, so here's a one time message to get you up to speed.\nThis is now a Random Number Generator as well as a Coin Flip app.\nAdditionally, there is no more settings page, you now set the coin face inside the app.";
+
 /**
  * Initialization method. Creates window and assigns handlers.
  */
-void window_instructions_init(void){
+void window_welcome_init(void){
 	window = window_create();
 	window_set_window_handlers(window, (WindowHandlers){
 		.load = window_load,
@@ -27,14 +28,14 @@ void window_instructions_init(void){
 /**
  * Deinitialization method. Destroys the window.
  */
-void window_instructions_deinit(void){
+void window_welcome_deinit(void){
 	window_destroy(window);
 }
 
 /**
  * Shows the window, with animation.
  */
-void window_instructions_show(){
+void window_welcome_show(){
 	window_stack_push(window, true);
 }
 
@@ -69,7 +70,7 @@ static void layer_header_update(Layer *layer, GContext *ctx){
 	graphics_context_set_fill_color(ctx, GColorBlack);
 	graphics_context_set_text_color(ctx, GColorWhite);
 	graphics_fill_rect(ctx, layer_get_bounds(layer), 0, GCornerNone);
-	graphics_draw_text(ctx, "Instructions", fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(0,0,144,22), 0, GTextAlignmentCenter, NULL);
+	graphics_draw_text(ctx, "Welcome to v2.0", fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(0,0,144,22), 0, GTextAlignmentCenter, NULL);
 }
 
 static void click_config_provider(void *context){

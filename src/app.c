@@ -3,6 +3,7 @@
 #include "windows/window-error.h"
 #include "windows/window-instructions.h"
 #include "windows/window-app.h"
+#include "windows/window-welcome.h"
 
 
 static void init(){
@@ -13,7 +14,9 @@ static void init(){
 	window_app_init();
 	window_app_show();
 	if (is_persist_working && is_first_start()){
+		window_welcome_init();
 		window_instructions_show();
+		window_welcome_show();
 		persist_write_bool(FIRST_TIME, false);
 	}
 	if (!is_persist_working){
