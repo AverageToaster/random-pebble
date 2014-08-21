@@ -1,4 +1,4 @@
-#Coin Flip
+# Random (Pebble)
 
 ## Changelog
 
@@ -16,12 +16,15 @@
     
 ## Features
 
-* Press Up/Select/Down or Shake to flip coin.
+* Press Up/Down to cycle between Coin Flip and Random Number Generator
+* Press Select or Shake to flip coin or generate random number.
 * Displays actual images of coins.
 * Allows user to select one of three sets of coin faces
     * US Quarter
     * UK Pound
     * Canadian Dollar
+* Set Max and Min range of RNG inside app by Long Pressing select while on RNG app.
+* Set Coin Face by Long Pressing select while on Coin app.
 
 ## Credits
 Credit to [@rpsqrd](https://github.com/rpsqrd) for Coin Faces.
